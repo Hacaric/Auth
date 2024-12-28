@@ -1,3 +1,7 @@
+import hashlib as hlib
+inp = input("Enter password >> ")
+hashed_password = hlib.sha256(inp.encode("ascii")).hexdigest()
 import urllib.request
-page = urllib.request.urlopen('http://services.runescape.com/m=hiscore/ranking?table=0&category_type=0&time_filter=0&date=1519066080774&user=zezima')
+page = urllib.request.urlopen('https://hacaric.github.io/Auth/')
 print(page.read())
+print(hashed_password)
