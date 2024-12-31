@@ -13,7 +13,7 @@ url = addr
 # Paths
 update_zip_path = './.update/version.zip'
 extract_path = './.update/update_files/'
-old_files_path = './test/'
+old_files_path = './'
 
 # Ensure directories exist
 os.makedirs(os.path.dirname(update_zip_path), exist_ok=True)
@@ -41,27 +41,37 @@ except Exception as e:
     print(f'Failed to unzip files: {e}')
     exit(1)
 
+#Rename to repository name
+
 try:
-    old_name = repository_name + "-main"
-    os.rename(extract_path+old_name, extract_path+repository_name)
+    old_folder = extract_path + repository_name + "-main"
+    new_folder = extract_path + repository_name
+    if os.path.exists(new_folder):
+        shutil.rmtree(new_folder) 
+    os.rename(old_folder, new_folder)
 except Exception as e:
-    print(f"Failed renaming directory {extract_path}{old_name} to {repository_name} error: {e}")
+    print(f"Failed renaming directory {extract_path}{old_folder} to {repository_name} error: {e}")
     exit(1)
 # Delete the zip file
 print("Deleting zip...")
 os.remove(update_zip_path)
+
+print("Replacing files...")
 new_files = [i for i in os.listdir(extract_path+repository_name+"/") if os.path.isfile(f"{extract_path}{repository_name}/{i}")]
 for filename in new_files:
     print(f"Replacing {filename}")
     os.replace(f"{extract_path}{repository_name}/{filename}", old_files_path+filename)
 
+print("Replacing folders...")
 new_folders = [i for i in os.listdir(extract_path+repository_name+"/") if not os.path.isfile(f"{extract_path}{repository_name}/{i}")]
 for folder_name in new_folders:
-    if folder_name in NOT_DELETE_DIR:
+    if folder_name in NOT_DELETE_DIR and folder_name in os.listdir(old_files_path):
         continue
     if os.path.exists(old_files_path+folder_name):
+        print(f"|---Updating {old_files_path+folder_name}")
         shutil.rmtree(old_files_path+folder_name)
-    os.rename(extract_path+folder_name, old_files_path+folder_name)
+    os.makedirs(old_files_path+folder_name)
+    os.rename(extract_path+repository_name+"/"+folder_name, old_files_path+folder_name)
 
 print("Update completed.")
 print("Cleaning up...")
